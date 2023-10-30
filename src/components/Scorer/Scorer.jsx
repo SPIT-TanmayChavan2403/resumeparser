@@ -19,7 +19,7 @@ export default function Scorer(props) {
             data.append(`image ${i}`, files[i]);
         }
 
-        fetch("https://20.243.20.210:5000/upload", {
+        fetch("http://localhost:5000/upload", {
             method: "POST",
             body: data,
             // body: JSON.stringify({files: data, jobDescription: jd}),
