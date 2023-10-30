@@ -1,7 +1,7 @@
 from flask import Flask,  jsonify
 from flask_cors import CORS
 from flask import request
-import scorer
+import scorer, json, os
 
 app = Flask(__name__)
 CORS(app)
@@ -13,13 +13,15 @@ UPLOAD_FOLDER = "Resume"
 def upload_files():
   # Loop through the files in request.files
   for file in request.files.values():
-    print(file)
-  for file in request.files.values():
     # Get the file name and extension
     filename = file.filename
     # Save the file to the upload folder
     file.save(UPLOAD_FOLDER + "/" + filename)
-  resp = scorer.main()
+  # jd = json.loads(request.data.decode("utf-8"))
+  resp = scorer.run('jobDescription')
+
+  for file in request.files.values():
+      os.remove(UPLOAD_FOLDER + "/" + file.filename)  
   return jsonify(resp)
 
 

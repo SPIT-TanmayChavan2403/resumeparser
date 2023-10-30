@@ -5,9 +5,10 @@ from nltk.stem import PorterStemmer
 from pdfminer.high_level import extract_text
 import os
 
-def start_process():
+def start_process(file_path, file_name, jd):
     # Sample target document (you should replace this with your target document)
     target_document = "We are looking for a qualified Front-end developer to join our IT team. You will be  responsible for building the ‘client-side’ of our web applications. You should be able to translate our company and customer needs into functional and appealing interactive applications. If you’re interested in creating a user-friendly environment by writing code and moving forward in your career, then this job is for you. We expect you to be a tech-savvy professional, who is curious about new digital technologies and aspires to combine usability with visual design. Ultimately, you should be able to create a functional and attractive digital environment for our company, ensuring great user experience. Responsibilities are as follow Use markup languages like HTML to create user-friendly web pages, Maintain and improve website, Optimize applications for maximum speed, Design mobile-based features, Collaborate with back-end developers and web designers to improve usability, Get feedback from, and build solutions for, users and customers, Write functional requirement documents and guides, Create quality mockups and prototypes, Help back-end developers with coding and troubleshooting, Ensure high quality graphic standards and brand consistency, Stay up-to-date on emerging technologies"
+    # target_document = jd
 
     # This array will store all the documents provided by the user.
     provided_documents = []
@@ -15,8 +16,7 @@ def start_process():
     def extract_text_from_pdf(pdf_path):
         provided_documents.append(extract_text(pdf_path))
 
-    for i in range(1, 13):
-        extract_text_from_pdf(f'{os.getcwd()}/Resume/file {i}.pdf');
+    extract_text_from_pdf(file_path);
 
     # Define the weighting parameter (α)
     alpha = 0.5  # You can optimize this parameter based on your experiments
@@ -65,17 +65,18 @@ def start_process():
         similarity_score = alpha * similarity + (1 - alpha) * association_rule_confidences[i]
         similarity_scores.append(similarity_score)
 
-    # Print the similarity scores for each provided document
-    response = {}
+    # Return the similarity scores for each provided document
     for i, score in enumerate(similarity_scores):
-        key = f"Rank of Resume {i + 1}"
-        print(f"{key}: {score*100}%")
-        response[key] = score*100
-    print("Final Response", response)
-    return response
+        key = f"Rank of {file_name}"
+        return score*100
 
-def main():
-    return start_process()
+def run(jd):
+    path = os.getcwd() + "/Resume"
+    files = os.listdir(path)
+    resp = {}
+    for file in files:
+        resp[file] = start_process(path + "/" + file, file, jd)
+    return resp
 
 if __name__ == "__main__":
-    main()
+    run()
