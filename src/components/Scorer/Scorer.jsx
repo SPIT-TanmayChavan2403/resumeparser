@@ -7,6 +7,14 @@ export default function Scorer(props) {
     const [result, setResult] = useState([])
     const [jd, setJD] = useState("")
     const inputRef = useRef(null);
+    const [preloader, setPreloader] = useState(false)
+    const [resStatus, setResStatus] = useState(false)
+    const [selectedValue, setSelectedValue] = useState("BERT")
+
+    const handleAlgoChange = (e) => {
+        console.log("Changing value to...", e.target.value)
+        setSelectedValue(e.target.value)
+    }
 
     const takeFiles = (e) => {
         const data = new FormData();
@@ -14,23 +22,25 @@ export default function Scorer(props) {
     }
 
     const upload = (e) => {
+        setResult([])
+        setResStatus(false)
+        setPreloader(true)
         const data = new FormData();
         for (let i = 0; i < files.length; i++) {
             data.append(`image ${i}`, files[i]);
         }
+        data.append("job_description", jd)
+        data.append("algo", selectedValue)
 
         fetch("http://localhost:5000/upload", {
             method: "POST",
             body: data,
             // body: JSON.stringify({files: data, jobDescription: jd}),
-        }).then(res => res.json()).then(data => {
-            let tempres = [];
-            for (const key in data) {
-                if (data.hasOwnProperty(key)) {
-                    tempres.push(`Score of ${key} is: ${data[key]}`);
-                }
-            }
-            setResult(tempres);
+        }).then(res => res.json())
+        .then(data => {
+            setResult(data);
+            setPreloader(false)
+            setResStatus(true)
         }).catch(err => {
             console.log(err);
         })
@@ -49,7 +59,10 @@ export default function Scorer(props) {
                 </div>
                 <div id={s.resume_container}>
                     <h2>Upload Resume</h2>
-                    
+                    <select name="cars" id="cars" onChange={handleAlgoChange} value={selectedValue}>
+                        <option value="BERT">BERT</option>
+                        <option value="TF-IDF">TF-IDF</option>
+                    </select>
                     <button onClick={() => {inputRef.current.click()}}>Select Files</button>
                     <input onChange={takeFiles} ref={inputRef} type="file" multiple  id={s.inputField} />
                     <button onClick={upload}>Upload</button>
@@ -63,11 +76,19 @@ export default function Scorer(props) {
                 </div>
             </div>
             <div id={s.bottom_section}>
-                <ul>
-                        {Array.from(result).map(file => {
-                            return <li key={file}>{file}</li>
-                        })}
-                </ul>
+                {
+                    !resStatus && !preloader && <h2>Upload files to calculate</h2>
+                }
+                {
+                    resStatus && <ul>
+                                    {Array.from(result).map(file => {
+                                        return <li key={file}>{file}</li>
+                                    })}
+                                </ul>
+                }
+                {
+                    preloader && <img src="preloader.gif"></img>
+                }
             </div>
         </div>
     );
